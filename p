@@ -70,7 +70,7 @@ def main():
     for dir in dirs:
         dirname = dir[:20]+'...' if len(dir)>20 else dir
         try:
-            last_modify_time = str(datetime.fromtimestamp(os.path.getmtime(dir)))
+            last_modify_time = str(datetime.fromtimestamp(os.path.getmtime(dir)))[:19]
         except:
             last_modify_time = CAN_NOT_GET
         try:
