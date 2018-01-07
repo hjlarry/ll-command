@@ -2,11 +2,12 @@ import os
 import click
 from datetime import datetime
 import unicodedata
+from terminaltables import AsciiTable
 
 
 TABLE_WIDTH = 30
-NO_DESCRIPTION = '---'
-CAN_NOT_GET = '---'
+NO_DESCRIPTION = ''
+CAN_NOT_GET = ''
 
 
 def get_file_comments(file):
@@ -32,15 +33,17 @@ def get_file_lines(file):
 
 
 def get_dir_lines(dir, depth=0):
-    lines = 0
-    if os.path.isdir(dir) and depth < 3:
-        for d in os.listdir(dir):
-            if os.path.isfile(dir+'/'+d):
-                lines += get_file_lines(dir+'/'+d)
-            else:
-                current_line = get_dir_lines(dir+'/'+d, depth+1)
-                lines += current_line if isinstance(current_line, int) else 0
-    return lines if depth<3 else '>'+str(lines)
+    # lines = 0
+    # if os.path.isdir(dir) and depth < 3:
+    #     for d in os.listdir(dir):
+    #         if os.path.isfile(dir+'/'+d):
+    #             lines += get_file_lines(dir+'/'+d)
+    #         else:
+    #             current_line = get_dir_lines(dir+'/'+d, depth+1)
+    #             lines += current_line if isinstance(current_line, int) else 0
+    # return lines if depth<3 else '>'+str(lines)
+    return CAN_NOT_GET
+
 
 def lines_and_description(dir):
     if os.path.isfile(dir):
@@ -67,6 +70,7 @@ def wide_chars(s):
 def main():
     dirs = os.listdir()
     click.secho('Current Path:{}'.format(os.getcwd())+ '    File Count:{}'.format(len(dirs)), fg='red')
+    table_data = [['filename', 'last modify time', 'lines', 'description']]
     for dir in dirs:
         dirname = dir[:20]+'...' if len(dir)>20 else dir
         try:
@@ -75,11 +79,14 @@ def main():
             last_modify_time = CAN_NOT_GET
         try:
             lines, description = lines_and_description(dir)
+            description = description[:37]+'...' if len(description)>40 else description
         except:
             lines, description = CAN_NOT_GET, NO_DESCRIPTION
-        color = 'cyan' if os.path.isfile(dir) else 'magenta'
-        click.secho(dirname +' ' * (TABLE_WIDTH - wide_chars(dirname)) +last_modify_time+ ' '*10 + '{0: ^10}'.format(lines)+'{0: ^40}'.format(description), fg=color)
-
+        table_data.append([dirname, last_modify_time, lines, description])
+        # color = 'cyan' if os.path.isfile(dir) else 'magenta'
+        # click.secho(dirname +' ' * (TABLE_WIDTH - wide_chars(dirname)) +last_modify_time+ ' '*10 + '{0: ^10}'.format(lines)+'{0: ^40}'.format(description), fg=color)
+    table = AsciiTable(table_data)
+    print(table.table)
 
 if __name__ == '__main__':
     main()
